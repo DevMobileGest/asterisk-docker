@@ -32,9 +32,15 @@ if [ ! -f /var/www/html/.pbx ]; then
     --astagidir=${ASTAGIDIR} --astspooldir=${ASTSPOOLDIR} --astrundir=${ASTRUNDIR} --astlogdir=${ASTLOGDIR} \
     --ampbin=${AMPBIN} --ampsbin=${AMPSBIN} --ampcgibin=${AMPCGIBIN} --ampplayback=${AMPPLAYBACK} -n
 
-    fwconsole ma installall
-    fwconsole reload
-    fwconsole restart
+    # Ejecutar fwconsole solo si existe (debería existir después de la instalación)
+    if command -v fwconsole &> /dev/null; then
+        echo "Configurando módulos de FreePBX..."
+        fwconsole ma installall
+        fwconsole reload
+        fwconsole restart
+    else
+        echo "Advertencia: fwconsole no encontrado después de la instalación"
+    fi
 
     touch /var/www/html/.pbx
 
@@ -50,8 +56,14 @@ else
     ln -sf /var/lib/asterisk/etc/freepbx.conf /etc/freepbx.conf
     ln -sf /var/lib/asterisk/bin/fwconsole /usr/sbin/fwconsole
 
-    fwconsole reload
-    fwconsole restart
+    # Ejecutar fwconsole solo si existe
+    if command -v fwconsole &> /dev/null; then
+        echo "Recargando configuración de FreePBX..."
+        fwconsole reload
+        fwconsole restart
+    else
+        echo "Advertencia: fwconsole no encontrado. Es posible que FreePBX no esté instalado correctamente."
+    fi
 fi
 
 # Arrancar Apache en primer plano
