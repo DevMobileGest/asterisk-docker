@@ -21,7 +21,10 @@ services:
 
   server:
     container_name: ${FREEPBX_CONTAINER_NAME:-freepbx_server}
-    image: ${FREEPBX_IMAGE:-docker.io/ovox/freepbx:17.0}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: ${FREEPBX_IMAGE:-docker.io/ovox/freepbx:17.0}  # Commented out - now building locally
     ports:
       - "${HTTPS_PORT:-443}:443"
       - "${AMI_PORT:-4445}:4445"
