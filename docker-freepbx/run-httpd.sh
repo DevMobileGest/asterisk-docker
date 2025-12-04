@@ -17,29 +17,42 @@ echo "Esperando a que MariaDB esté lista en $DB_HOST:$DB_PORT ..."
 
 # Función para iniciar Asterisk y esperar a que esté listo
 start_asterisk() {
-    # Preparar directorios necesarios para Asterisk
-    echo "Preparando directorios de Asterisk..."
-    mkdir -p /var/run/asterisk
-    mkdir -p /var/log/asterisk
+    # Preparar directorios necesarios para Asterisk y corregir permisos
+    echo "Corrigiendo permisos de directorios Asterisk..."
+    mkdir -p /var/run/asterisk /var/log/asterisk /var/spool/asterisk /var/lib/asterisk /etc/asterisk
+    
+    # Asegurar permisos correctos (especialmente útil si se usan volúmenes)
     chown -R asterisk:asterisk /var/run/asterisk
     chown -R asterisk:asterisk /var/log/asterisk
     chown -R asterisk:asterisk /var/spool/asterisk
+    chown -R asterisk:asterisk /var/lib/asterisk
+    chown -R asterisk:asterisk /etc/asterisk
+    chown -R asterisk:asterisk /usr/lib64/asterisk
+    
     chmod 755 /var/run/asterisk
     
     cd ${WORKDIR}
     echo "Iniciando Asterisk..."
     
-    # Primero intentar iniciar en foreground para capturar errores
-    echo "Probando inicio de Asterisk en modo verbose..."
-    timeout 10 su - asterisk -c "asterisk -vvvc" > /tmp/asterisk_start.log 2>&1 || true
-    
-    if grep -i "error\|fail\|cannot\|unable" /tmp/asterisk_start.log; then
-        echo "❌ Error detectado al iniciar Asterisk:"
-        cat /tmp/asterisk_start.log
-        echo "Intentando de todas formas con el script start_asterisk..."
+    # Debug: Mostrar configuración básica
+    if [ -f /etc/asterisk/asterisk.conf ]; then
+        echo "Contenido de asterisk.conf:"
+        cat /etc/asterisk/asterisk.conf
+    else
+        echo "⚠ /etc/asterisk/asterisk.conf NO existe!"
     fi
     
-    # Ahora iniciar normalmente
+    # Primero intentar iniciar en foreground para capturar errores
+    echo "Probando inicio de Asterisk en modo verbose (5s)..."
+    # Usamos stdbuf para evitar buffering
+    timeout 5s su - asterisk -c "asterisk -vvvc" > /tmp/asterisk_start.log 2>&1 || true
+    
+    echo "--- LOG DE INICIO DE ASTERISK ---"
+    cat /tmp/asterisk_start.log
+    echo "---------------------------------"
+    
+    # Ahora iniciar normalmente con el script de FreePBX
+    echo "Ejecutando ./start_asterisk start ..."
     ./start_asterisk start
     
     # Esperar a que Asterisk esté realmente listo
