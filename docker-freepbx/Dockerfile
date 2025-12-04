@@ -77,8 +77,10 @@ RUN \
 
 # Add scripts
 ADD auto-ssl-gen.sh /usr/local/bin/auto-ssl-gen.sh
+ADD wait-for-it.sh /usr/local/bin/wait-for-it.sh
 ADD run-httpd.sh /run-httpd.sh
 RUN chmod -v +x /usr/local/bin/auto-ssl-gen.sh && \
+  chmod -v +x /usr/local/bin/wait-for-it.sh && \
   chmod -v +x /run-httpd.sh
 
 VOLUME [ "/var/lib/asterisk", "/etc/asterisk", "/usr/lib64/asterisk", "/var/www/html", "/var/log/asterisk" ]
