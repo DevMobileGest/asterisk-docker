@@ -74,8 +74,12 @@ RUN \
   rm /usr/src/asterisk-20-current.tar.gz && \
   rm /usr/local/src/freepbx-17.0-latest-EDGE.tgz && \
   apt-get clean
+
+# Add scripts
+ADD auto-ssl-gen.sh /usr/local/bin/auto-ssl-gen.sh
 ADD run-httpd.sh /run-httpd.sh
-RUN chmod -v +x /run-httpd.sh
+RUN chmod -v +x /usr/local/bin/auto-ssl-gen.sh && \
+  chmod -v +x /run-httpd.sh
 
 VOLUME [ "/var/lib/asterisk", "/etc/asterisk", "/usr/lib64/asterisk", "/var/www/html", "/var/log/asterisk" ]
 

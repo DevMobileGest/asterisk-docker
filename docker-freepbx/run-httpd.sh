@@ -3,6 +3,10 @@ set -e
 
 WORKDIR=/usr/local/src/freepbx
 
+# Generar certificados SSL si no existen
+echo "Verificando certificados SSL..."
+/usr/local/bin/auto-ssl-gen.sh
+
 # Variables de conexión a MariaDB
 DB_HOST=${DBHOST:-172.32.0.2}
 DB_PORT=${DBPORT:-3306}
