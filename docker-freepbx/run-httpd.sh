@@ -14,10 +14,25 @@ DB_PORT=${DBPORT:-3306}
 echo "Esperando a que MariaDB esté lista en $DB_HOST:$DB_PORT ..."
 /usr/local/bin/wait-for-it.sh $DB_HOST:$DB_PORT --timeout=300 --strict -- echo "MariaDB está lista!"
 
-# Función para iniciar Asterisk
+# Función para iniciar Asterisk y esperar a que esté listo
 start_asterisk() {
     cd ${WORKDIR}
+    echo "Iniciando Asterisk..."
     ./start_asterisk start
+    
+    # Esperar a que Asterisk esté realmente listo
+    echo "Esperando a que Asterisk esté completamente operativo..."
+    for i in {1..30}; do
+        if asterisk -rx "core show version" &>/dev/null; then
+            echo "Asterisk está listo!"
+            return 0
+        fi
+        echo "Esperando... ($i/30)"
+        sleep 2
+    done
+    
+    echo "Advertencia: Asterisk puede no estar completamente listo"
+    return 1
 }
 
 # Instalación inicial de FreePBX
@@ -25,7 +40,8 @@ start_asterisk() {
 if [ ! -f /var/lib/asterisk/bin/fwconsole ] && [ ! -f /usr/sbin/fwconsole ]; then
     echo "Instalando FreePBX por primera vez..."
     start_asterisk
-    sleep 5
+
+    echo "Iniciando instalador de FreePBX..."
 
     ./install --dbengine=${DBENGINE} --dbname=${DBNAME} --dbhost=${DBHOST} --dbport=${DBPORT} \
     --cdrdbname=${CDRDBNAME} --dbuser=${DBUSER} --dbpass=${DBPASS} --user=${USER} --group=${GROUP} \
