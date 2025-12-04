@@ -21,7 +21,8 @@ start_asterisk() {
 }
 
 # Instalación inicial de FreePBX
-if [ ! -f /var/www/html/.pbx ]; then
+# Verificar si fwconsole existe (mejor indicador de instalación completa)
+if [ ! -f /var/lib/asterisk/bin/fwconsole ] && [ ! -f /usr/sbin/fwconsole ]; then
     echo "Instalando FreePBX por primera vez..."
     start_asterisk
     sleep 5
