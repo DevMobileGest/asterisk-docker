@@ -17,6 +17,14 @@ echo "Esperando a que MariaDB esté lista en $DB_HOST:$DB_PORT ..."
 
 # Función para iniciar Asterisk y esperar a que esté listo
 start_asterisk() {
+    # Preparar directorios necesarios para Asterisk
+    echo "Preparando directorios de Asterisk..."
+    mkdir -p /var/run/asterisk
+    mkdir -p /var/log/asterisk
+    chown -R asterisk:asterisk /var/run/asterisk
+    chown -R asterisk:asterisk /var/log/asterisk
+    chmod 755 /var/run/asterisk
+    
     cd ${WORKDIR}
     echo "Iniciando Asterisk..."
     ./start_asterisk start
@@ -40,6 +48,11 @@ start_asterisk() {
                 if su - asterisk -c "asterisk -rx 'core show version'" &>/dev/null; then
                     echo "✓ Asterisk está listo y respondiendo!"
                     return 0
+                fi
+            else
+                echo "Socket no encontrado aún, verificando logs..."
+                if [ -f /var/log/asterisk/full ]; then
+                    tail -5 /var/log/asterisk/full | grep -i error || true
                 fi
             fi
         fi
