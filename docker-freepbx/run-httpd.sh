@@ -23,10 +23,23 @@ start_asterisk() {
     mkdir -p /var/log/asterisk
     chown -R asterisk:asterisk /var/run/asterisk
     chown -R asterisk:asterisk /var/log/asterisk
+    chown -R asterisk:asterisk /var/spool/asterisk
     chmod 755 /var/run/asterisk
     
     cd ${WORKDIR}
     echo "Iniciando Asterisk..."
+    
+    # Primero intentar iniciar en foreground para capturar errores
+    echo "Probando inicio de Asterisk en modo verbose..."
+    timeout 10 su - asterisk -c "asterisk -vvvc" > /tmp/asterisk_start.log 2>&1 || true
+    
+    if grep -i "error\|fail\|cannot\|unable" /tmp/asterisk_start.log; then
+        echo "❌ Error detectado al iniciar Asterisk:"
+        cat /tmp/asterisk_start.log
+        echo "Intentando de todas formas con el script start_asterisk..."
+    fi
+    
+    # Ahora iniciar normalmente
     ./start_asterisk start
     
     # Esperar a que Asterisk esté realmente listo
