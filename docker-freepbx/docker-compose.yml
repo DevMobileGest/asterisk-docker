@@ -15,7 +15,7 @@ services:
       asterisk:
         ipv4_address: ${MARIADB_IP:-172.32.0.2}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
