@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+# Note: Not using 'set -e' to prevent container crashes during installation
+# We handle errors explicitly where needed
 
 WORKDIR=/usr/local/src/freepbx
 
@@ -22,16 +23,33 @@ start_asterisk() {
     
     # Esperar a que Asterisk esté realmente listo
     echo "Esperando a que Asterisk esté completamente operativo..."
-    for i in {1..30}; do
-        if asterisk -rx "core show version" &>/dev/null; then
-            echo "Asterisk está listo!"
-            return 0
+    
+    # Dar tiempo inicial para que Asterisk inicie
+    sleep 3
+    
+    for i in {1..20}; do
+        # Verificar si el proceso está corriendo
+        if pgrep -x asterisk > /dev/null; then
+            echo "Proceso Asterisk encontrado"
+            
+            # Verificar si el socket existe
+            if [ -S /var/run/asterisk/asterisk.ctl ]; then
+                echo "Socket de Asterisk encontrado"
+                
+                # Intentar comunicarse con Asterisk
+                if su - asterisk -c "asterisk -rx 'core show version'" &>/dev/null; then
+                    echo "✓ Asterisk está listo y respondiendo!"
+                    return 0
+                fi
+            fi
         fi
-        echo "Esperando... ($i/30)"
-        sleep 2
+        
+        echo "Esperando... ($i/20)"
+        sleep 3
     done
     
-    echo "Advertencia: Asterisk puede no estar completamente listo"
+    echo "⚠ Advertencia: Asterisk puede no estar completamente listo"
+    echo "Continuando de todas formas..."
     return 1
 }
 
