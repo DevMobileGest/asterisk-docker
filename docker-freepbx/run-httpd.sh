@@ -36,10 +36,33 @@ start_asterisk() {
     
     # Debug: Mostrar configuración básica
     if [ -f /etc/asterisk/asterisk.conf ]; then
-        echo "Contenido de asterisk.conf:"
+        echo "Contenido original de asterisk.conf:"
         cat /etc/asterisk/asterisk.conf
+        
+        # Asegurar configuración correcta de directorios y socket
+        echo "Forzando configuración de directorios en asterisk.conf..."
+        sed -i 's|^;astrundir.*|astrundir => /var/run/asterisk|' /etc/asterisk/asterisk.conf
+        sed -i 's|^astrundir.*|astrundir => /var/run/asterisk|' /etc/asterisk/asterisk.conf
+        
+        # Asegurar que la sección [files] existe
+        if ! grep -q "^\[files\]" /etc/asterisk/asterisk.conf; then
+            echo "[files]" >> /etc/asterisk/asterisk.conf
+            echo "astctlpermissions = 0775" >> /etc/asterisk/asterisk.conf
+            echo "astctlowner = asterisk" >> /etc/asterisk/asterisk.conf
+            echo "astctlgroup = asterisk" >> /etc/asterisk/asterisk.conf
+            echo "astctl = asterisk.ctl" >> /etc/asterisk/asterisk.conf
+        fi
     else
-        echo "⚠ /etc/asterisk/asterisk.conf NO existe!"
+        echo "⚠ /etc/asterisk/asterisk.conf NO existe! Creando uno básico..."
+        mkdir -p /etc/asterisk
+        echo "[directories]" > /etc/asterisk/asterisk.conf
+        echo "astrundir => /var/run/asterisk" >> /etc/asterisk/asterisk.conf
+        echo "[files]" >> /etc/asterisk/asterisk.conf
+        echo "astctlpermissions = 0775" >> /etc/asterisk/asterisk.conf
+        echo "astctlowner = asterisk" >> /etc/asterisk/asterisk.conf
+        echo "astctlgroup = asterisk" >> /etc/asterisk/asterisk.conf
+        echo "astctl = asterisk.ctl" >> /etc/asterisk/asterisk.conf
+        chown asterisk:asterisk /etc/asterisk/asterisk.conf
     fi
     
     # Primero intentar iniciar en foreground para capturar errores
