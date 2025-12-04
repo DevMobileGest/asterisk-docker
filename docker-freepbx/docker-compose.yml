@@ -13,7 +13,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-asterisk}
     networks:
       asterisk:
-        ipv4_address: ${MARIADB_IP:-172.18.0.2}
+        ipv4_address: ${MARIADB_IP:-172.19.0.2}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -37,7 +37,7 @@ services:
       - DB_PASS=${DB_PASS:-asteriskpass}
       - DBENGINE=${DBENGINE:-mysql}
       - DBNAME=${DBNAME:-asterisk}
-      - DBHOST=${DBHOST:-172.18.0.2}
+      - DBHOST=${DBHOST:-172.19.0.2}
       - DBPORT=${DBPORT:-3306}
       - CDRDBNAME=${CDRDBNAME:-asteriskcdrdb}
       - DBUSER=${DB_USER:-asterisk}
@@ -67,7 +67,7 @@ services:
     restart: ${RESTART_POLICY:-always}
     networks:
       asterisk:
-        ipv4_address: ${FREEPBX_IP:-172.18.0.3}
+        ipv4_address: ${FREEPBX_IP:-172.19.0.3}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -99,5 +99,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: ${NETWORK_SUBNET:-172.18.0.0/24}
-          gateway: ${NETWORK_GATEWAY:-172.18.0.1}
+        - subnet: ${NETWORK_SUBNET:-172.19.0.0/24}
+          gateway: ${NETWORK_GATEWAY:-172.19.0.1}
