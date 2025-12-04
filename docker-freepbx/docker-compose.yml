@@ -13,11 +13,11 @@ services:
       asterisk:
         ipv4_address: ${MARIADB_IP:-172.32.0.2}
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 172.32.0.2 -u root -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 20
-      start_period: 60s
+      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/3306' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   server:
     container_name: ${FREEPBX_CONTAINER_NAME:-freepbx_server}
