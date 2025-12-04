@@ -38,7 +38,7 @@ start_asterisk() {
     for i in {1..20}; do
         # Verificar si el proceso está corriendo
         if pgrep -x asterisk > /dev/null; then
-            echo "Proceso Asterisk encontrado"
+            echo "Proceso Asterisk encontrado (PID: $(pgrep -x asterisk))"
             
             # Verificar si el socket existe
             if [ -S /var/run/asterisk/asterisk.ctl ]; then
@@ -50,11 +50,23 @@ start_asterisk() {
                     return 0
                 fi
             else
-                echo "Socket no encontrado aún, verificando logs..."
+                echo "⚠ Socket /var/run/asterisk/asterisk.ctl no existe"
+                echo "Archivos en /var/run/asterisk:"
+                ls -la /var/run/asterisk/ || echo "Directorio vacío o no accesible"
+                
+                # Mostrar logs si existen
                 if [ -f /var/log/asterisk/full ]; then
-                    tail -5 /var/log/asterisk/full | grep -i error || true
+                    echo "Últimas líneas del log:"
+                    tail -10 /var/log/asterisk/full
+                elif [ -f /var/log/asterisk/messages ]; then
+                    echo "Últimas líneas de messages:"
+                    tail -10 /var/log/asterisk/messages
+                else
+                    echo "No se encontraron archivos de log de Asterisk"
                 fi
             fi
+        else
+            echo "⚠ Proceso Asterisk no encontrado en intento $i"
         fi
         
         echo "Esperando... ($i/20)"
